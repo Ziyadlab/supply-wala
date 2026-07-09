@@ -23,7 +23,7 @@ class InventoryScreen extends StatelessWidget {
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                const SectionTitle('My Inventory'),
+                SectionTitle('My Inventory', count: state.myInventory.length),
                 const SizedBox(height: 10),
                 ...state.myInventory.map(
                   (product) => Padding(

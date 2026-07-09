@@ -36,4 +36,36 @@ void main() {
 
     expect(find.text('Spice Bistro'), findsWidgets);
   });
+
+  testWidgets('supplier shell shows supplier navigation and inventory tab', (
+    tester,
+  ) async {
+    final state = AppState()
+      ..currentUser = AppUser(
+        name: 'Hassan Supplier',
+        email: 'supplier@supplywala.pk',
+        role: UserRole.supplier,
+        businessName: 'Fresh Farm Supplies',
+        location: 'Lahore, Pakistan',
+        phone: '+92 300 1234567',
+        avatarUrl:
+            'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500',
+      );
+
+    await tester.pumpWidget(
+      AppScope(
+        state: state,
+        child: MaterialApp(theme: AppTheme.light, home: const MainShell()),
+      ),
+    );
+
+    expect(find.text('Active Orders'), findsOneWidget);
+    expect(find.text('Inventory'), findsOneWidget);
+    expect(find.text('Browse'), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('supplier-nav-inventory')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('My Inventory'), findsOneWidget);
+  });
 }

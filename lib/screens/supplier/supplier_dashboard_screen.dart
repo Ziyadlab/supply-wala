@@ -8,6 +8,7 @@ import '../shared/chat_detail_screen.dart';
 import '../shared/order_detail_screen.dart';
 import '../shared/orders_screen.dart';
 import 'inventory_screen.dart';
+import 'supplier_customers_screen.dart';
 
 class SupplierDashboardScreen extends StatelessWidget {
   const SupplierDashboardScreen({super.key});
@@ -211,20 +212,32 @@ class SupplierDashboardScreen extends StatelessWidget {
                 ),
               ),
             const SizedBox(height: 30),
-            const SectionTitle('My Customers'),
+            SectionTitle(
+              'My Customers',
+              action: TextButton(
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const SupplierCustomersScreen(),
+                  ),
+                ),
+                child: const Text('View All'),
+              ),
+            ),
             const SizedBox(height: 14),
             SizedBox(
               height: 88,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
-                itemCount: state.orders.length + 1,
+                itemCount: state.supplierCustomers.length + 1,
                 separatorBuilder: (_, __) => const SizedBox(width: 18),
                 itemBuilder: (_, index) {
                   if (index == 0) {
                     return const _CustomerBubble.invite();
                   }
-                  final order = state.orders[index - 1];
-                  return _CustomerBubble(label: order.restaurantName);
+                  return _CustomerBubble(
+                    label: state.supplierCustomers[index - 1],
+                  );
                 },
               ),
             ),

@@ -97,19 +97,48 @@ class AppState extends ChangeNotifier {
   int get cartCount => cart.fold(0, (sum, item) => sum + item.quantity);
 
   int get inventoryCount {
-    final supplierId = _activeSupplierId;
+    final supplierId = activeSupplierId;
     return products.where((product) => product.supplierId == supplierId).length;
   }
 
-  String get _activeSupplierId => suppliers.first.id;
+  String get activeSupplierId {
+    final userBusiness = currentUser?.businessName.toLowerCase().trim();
+    if (userBusiness != null && userBusiness.isNotEmpty) {
+      for (final supplier in suppliers) {
+        if (supplier.name.toLowerCase().trim() == userBusiness) {
+          return supplier.id;
+        }
+      }
+    }
+    return suppliers.first.id;
+  }
 
-  List<Product> get myInventory => supplierProducts(_activeSupplierId);
+  Supplier get activeSupplier =>
+      supplierById(activeSupplierId) ?? suppliers.first;
+
+  List<Product> get myInventory => supplierProducts(activeSupplierId);
 
   List<AppOrder> get visibleOrders {
     if (isSupplier) {
-      return orders;
+      return orders
+          .where((order) => order.supplierId == activeSupplierId)
+          .toList();
     }
     return orders;
+  }
+
+  List<String> get supplierCustomers {
+    final names = <String>{};
+    for (final order in visibleOrders) {
+      names.add(order.restaurantName);
+    }
+    return names.toList();
+  }
+
+  List<AppOrder> ordersForCustomer(String restaurantName) {
+    return visibleOrders
+        .where((order) => order.restaurantName == restaurantName)
+        .toList();
   }
 
   int get pendingOrders =>

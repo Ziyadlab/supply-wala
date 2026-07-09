@@ -8,14 +8,16 @@ import '../auth/login_screen.dart';
 import 'edit_profile_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+  const ProfileScreen({super.key, this.showAppBar = true});
+
+  final bool showAppBar;
 
   @override
   Widget build(BuildContext context) {
     final state = AppScope.of(context);
     final user = state.currentUser;
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
+      appBar: showAppBar ? AppBar(title: const Text('Profile')) : null,
       body: user == null
           ? const EmptyState(
               icon: Icons.person_off_outlined,

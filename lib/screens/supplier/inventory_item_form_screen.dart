@@ -16,7 +16,6 @@ class InventoryItemFormScreen extends StatefulWidget {
 class _InventoryItemFormScreenState extends State<InventoryItemFormScreen> {
   final formKey = GlobalKey<FormState>();
   late final TextEditingController name;
-  late final TextEditingController image;
   late final TextEditingController category;
   late final TextEditingController price;
   late final TextEditingController quantity;
@@ -28,11 +27,6 @@ class _InventoryItemFormScreenState extends State<InventoryItemFormScreen> {
     super.initState();
     final product = widget.product;
     name = TextEditingController(text: product?.name ?? '');
-    image = TextEditingController(
-      text:
-          product?.imageUrl ??
-          'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500',
-    );
     category = TextEditingController(text: product?.category ?? 'Vegetables');
     price = TextEditingController(
       text: product?.price.toStringAsFixed(0) ?? '',
@@ -57,7 +51,6 @@ class _InventoryItemFormScreenState extends State<InventoryItemFormScreen> {
           padding: const EdgeInsets.all(16),
           children: [
             _field(name, 'Product name'),
-            _field(image, 'Image URL'),
             _field(category, 'Category'),
             _field(price, 'Price', number: true),
             _field(quantity, 'Quantity', number: true),
@@ -71,14 +64,16 @@ class _InventoryItemFormScreenState extends State<InventoryItemFormScreen> {
             ElevatedButton(
               onPressed: () {
                 if (!formKey.currentState!.validate()) return;
-                final supplierId = state.suppliers.first.id;
+                final supplierId = state.activeSupplierId;
                 final product = Product(
                   id:
                       widget.product?.id ??
                       'p${DateTime.now().millisecondsSinceEpoch}',
                   supplierId: widget.product?.supplierId ?? supplierId,
                   name: name.text,
-                  imageUrl: image.text,
+                  imageUrl:
+                      widget.product?.imageUrl ??
+                      'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500',
                   category: category.text,
                   price: double.tryParse(price.text) ?? 0,
                   quantity: int.tryParse(quantity.text) ?? 0,

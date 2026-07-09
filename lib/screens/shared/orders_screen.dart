@@ -5,18 +5,25 @@ import '../../widgets/app_widgets.dart';
 import 'order_detail_screen.dart';
 
 class OrdersScreen extends StatelessWidget {
-  const OrdersScreen({super.key});
+  const OrdersScreen({super.key, this.showAppBar = true});
+
+  final bool showAppBar;
 
   @override
   Widget build(BuildContext context) {
     final state = AppScope.of(context);
+    final title = state.isSupplier ? 'Supplier Orders' : 'Orders';
     return Scaffold(
-      appBar: AppBar(title: const Text('Orders')),
+      appBar: showAppBar ? AppBar(title: Text(title)) : null,
       body: state.visibleOrders.isEmpty
-          ? const EmptyState(
+          ? EmptyState(
               icon: Icons.receipt_long_outlined,
-              title: 'No orders yet',
-              message: 'Orders placed by restaurants will appear here.',
+              title: state.isSupplier
+                  ? 'No supplier orders yet'
+                  : 'No orders yet',
+              message: state.isSupplier
+                  ? 'Restaurant buyer orders for your inventory will appear here.'
+                  : 'Orders placed by restaurants will appear here.',
             )
           : ListView.separated(
               padding: const EdgeInsets.all(16),
