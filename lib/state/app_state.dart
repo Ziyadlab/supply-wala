@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/sample_data.dart';
@@ -116,7 +117,7 @@ class AppState extends ChangeNotifier {
   int get completedOrders =>
       visibleOrders.where((o) => o.status == OrderStatus.completed).length;
 
-  bool get _canUseFirebaseAuth => Firebase.apps.isNotEmpty && !kIsWeb;
+  bool get _canUseFirebaseAuth => Firebase.apps.isNotEmpty;
 
   Future<void> _restoreSession() async {
     if (!_canUseFirebaseAuth) return;
@@ -178,37 +179,74 @@ class AppState extends ChangeNotifier {
         error = 'Enter a valid email and at least 6 character password.';
         return false;
       }
-      if (_canUseFirebaseAuth) {
-        try {
-          final credential = await firebase_auth.FirebaseAuth.instance
-              .signInWithEmailAndPassword(
-                email: email.trim(),
-                password: password,
-              );
-          currentUser = await _appUserFromFirebase(credential.user!, role);
-          error = null;
-          return true;
-        } on firebase_auth.FirebaseAuthException catch (exception) {
-          error = _friendlyFirebaseError(exception);
+      if (!_canUseFirebaseAuth) {
+        error = 'Firebase is not initialized. Run FlutterFire configure first.';
+        return false;
+      }
+      try {
+        final credential = await firebase_auth.FirebaseAuth.instance
+            .signInWithEmailAndPassword(
+              email: email.trim(),
+              password: password,
+            );
+        currentUser = await _appUserFromFirebase(credential.user!, role);
+        error = null;
+        return true;
+      } on firebase_auth.FirebaseAuthException catch (exception) {
+        error = _friendlyFirebaseError(exception);
+        return false;
+      }
+    });
+  }
+
+  Future<bool> signInWithGoogle(UserRole role) async {
+    return _withLoading(() async {
+      if (!_canUseFirebaseAuth) {
+        error = 'Firebase is not initialized. Run FlutterFire configure first.';
+        return false;
+      }
+      try {
+        late final firebase_auth.UserCredential credential;
+        final googleProvider = firebase_auth.GoogleAuthProvider()
+          ..addScope('email');
+
+        if (kIsWeb) {
+          credential = await firebase_auth.FirebaseAuth.instance
+              .signInWithPopup(googleProvider);
+        } else if (defaultTargetPlatform == TargetPlatform.android ||
+            defaultTargetPlatform == TargetPlatform.iOS) {
+          final googleUser = await GoogleSignIn.instance.authenticate();
+          final googleAuth = googleUser.authentication;
+          final firebaseCredential = firebase_auth
+              .GoogleAuthProvider.credential(idToken: googleAuth.idToken);
+          credential = await firebase_auth.FirebaseAuth.instance
+              .signInWithCredential(firebaseCredential);
+        } else {
+          credential = await firebase_auth.FirebaseAuth.instance
+              .signInWithProvider(googleProvider);
+        }
+
+        final user = credential.user;
+        if (user == null) {
+          error = 'Google sign in did not return a Firebase user.';
           return false;
         }
+        await _ensureProfileForProviderUser(user, role);
+        currentUser = await _appUserFromFirebase(user, role);
+        error = null;
+        return true;
+      } on firebase_auth.FirebaseAuthException catch (exception) {
+        error = _friendlyFirebaseError(exception);
+        return false;
+      } on GoogleSignInException catch (exception) {
+        error = exception.code == GoogleSignInExceptionCode.canceled
+            ? 'Google sign in was cancelled.'
+            : exception.description ?? 'Google sign in failed.';
+        return false;
+      } catch (exception) {
+        error = 'Google sign in failed. $exception';
+        return false;
       }
-      final savedRole = await _roleForEmail(email.trim()) ?? role;
-      currentUser = AppUser(
-        name: savedRole == UserRole.restaurant ? 'Ali Khan' : 'Hassan Supplier',
-        email: email,
-        role: savedRole,
-        businessName: savedRole == UserRole.restaurant
-            ? 'Spice Bistro'
-            : 'Fresh Farm Supplies',
-        location: 'Lahore, Pakistan',
-        phone: '+92 300 1234567',
-        avatarUrl: savedRole == UserRole.restaurant
-            ? 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=500'
-            : suppliers.first.logoUrl,
-      );
-      error = null;
-      return true;
     });
   }
 
@@ -227,49 +265,32 @@ class AppState extends ChangeNotifier {
         error = 'Please complete all fields with valid information.';
         return false;
       }
-      if (_canUseFirebaseAuth) {
-        try {
-          final credential = await firebase_auth.FirebaseAuth.instance
-              .createUserWithEmailAndPassword(
-                email: email.trim(),
-                password: password,
-              );
-          await credential.user?.updateDisplayName(
-            '${role.name}|${name.trim()}|${businessName.trim()}',
-          );
-          await _saveLocalProfile(
-            email: email.trim(),
-            role: role,
-            name: name.trim(),
-            businessName: businessName.trim(),
-          );
-          currentUser = _fallbackUser(
-            name: name.trim(),
-            email: email.trim(),
-            role: role,
-            businessName: businessName.trim(),
-          );
-          error = null;
-          return true;
-        } on firebase_auth.FirebaseAuthException catch (exception) {
-          error = _friendlyFirebaseError(exception);
-          return false;
-        }
+      if (!_canUseFirebaseAuth) {
+        error = 'Firebase is not initialized. Run FlutterFire configure first.';
+        return false;
       }
-      await _saveLocalProfile(
-        email: email.trim(),
-        role: role,
-        name: name.trim(),
-        businessName: businessName.trim(),
-      );
-      currentUser = _fallbackUser(
-        name: name.trim(),
-        email: email.trim(),
-        role: role,
-        businessName: businessName.trim(),
-      );
-      error = null;
-      return true;
+      try {
+        final credential = await firebase_auth.FirebaseAuth.instance
+            .createUserWithEmailAndPassword(
+              email: email.trim(),
+              password: password,
+            );
+        await credential.user?.updateDisplayName(
+          '${role.name}|${name.trim()}|${businessName.trim()}',
+        );
+        await _saveLocalProfile(
+          email: email.trim(),
+          role: role,
+          name: name.trim(),
+          businessName: businessName.trim(),
+        );
+        currentUser = await _appUserFromFirebase(credential.user!, role);
+        error = null;
+        return true;
+      } on firebase_auth.FirebaseAuthException catch (exception) {
+        error = _friendlyFirebaseError(exception);
+        return false;
+      }
     });
   }
 
@@ -279,15 +300,17 @@ class AppState extends ChangeNotifier {
         error = 'Enter a valid email address.';
         return false;
       }
-      if (_canUseFirebaseAuth) {
-        try {
-          await firebase_auth.FirebaseAuth.instance.sendPasswordResetEmail(
-            email: email.trim(),
-          );
-        } on firebase_auth.FirebaseAuthException catch (exception) {
-          error = _friendlyFirebaseError(exception);
-          return false;
-        }
+      if (!_canUseFirebaseAuth) {
+        error = 'Firebase is not initialized. Run FlutterFire configure first.';
+        return false;
+      }
+      try {
+        await firebase_auth.FirebaseAuth.instance.sendPasswordResetEmail(
+          email: email.trim(),
+        );
+      } on firebase_auth.FirebaseAuthException catch (exception) {
+        error = _friendlyFirebaseError(exception);
+        return false;
       }
       error = null;
       return true;
@@ -312,6 +335,11 @@ class AppState extends ChangeNotifier {
   Future<void> logout() async {
     if (_canUseFirebaseAuth) {
       await firebase_auth.FirebaseAuth.instance.signOut();
+      if (!kIsWeb) {
+        try {
+          await GoogleSignIn.instance.signOut();
+        } catch (_) {}
+      }
     }
     currentUser = null;
     cart.clear();
@@ -328,6 +356,11 @@ class AppState extends ChangeNotifier {
         return 'This email is already registered.';
       case 'weak-password':
         return 'Use a stronger password.';
+      case 'operation-not-allowed':
+        return 'This sign-in method is not enabled in Firebase Authentication.';
+      case 'popup-closed-by-user':
+      case 'cancelled-popup-request':
+        return 'Google sign in was cancelled.';
       case 'network-request-failed':
         return 'Network error. Check your internet connection.';
       default:
@@ -335,22 +368,25 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  AppUser _fallbackUser({
-    required String name,
-    required String email,
-    required UserRole role,
-    required String businessName,
-  }) {
-    return AppUser(
-      name: name,
+  Future<void> _ensureProfileForProviderUser(
+    firebase_auth.User firebaseUser,
+    UserRole role,
+  ) async {
+    final email = firebaseUser.email ?? '';
+    if (email.isEmpty) return;
+    final existingRole = await _roleForEmail(email);
+    if (existingRole != null) return;
+    final name = (firebaseUser.displayName?.trim().isNotEmpty ?? false)
+        ? firebaseUser.displayName!.trim()
+        : (role == UserRole.restaurant ? 'Restaurant Owner' : 'Supplier Owner');
+    final businessName = role == UserRole.restaurant
+        ? 'My Restaurant'
+        : 'My Supplier Business';
+    await _saveLocalProfile(
       email: email,
       role: role,
+      name: name,
       businessName: businessName,
-      location: 'Lahore, Pakistan',
-      phone: '+92 300 1234567',
-      avatarUrl: role == UserRole.restaurant
-          ? 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=500'
-          : suppliers.first.logoUrl,
     );
   }
 

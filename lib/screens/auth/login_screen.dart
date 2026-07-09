@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/app_theme.dart';
 import '../../models/app_models.dart';
 import '../../state/app_state.dart';
+import '../../widgets/app_widgets.dart';
 import '../shared/main_shell.dart';
 import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
@@ -16,8 +17,8 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final formKey = GlobalKey<FormState>();
-  final email = TextEditingController(text: 'restaurant@supplywala.pk');
-  final password = TextEditingController(text: '123456');
+  final email = TextEditingController();
+  final password = TextEditingController();
   UserRole role = UserRole.restaurant;
 
   @override
@@ -228,6 +229,22 @@ class _LoginScreenState extends State<LoginScreen> {
                           )
                         : const Text('SIGN IN'),
                   ),
+                  const SizedBox(height: 16),
+                  const _AuthDivider(),
+                  const SizedBox(height: 16),
+                  GoogleAuthButton(
+                    label: 'Continue with Google',
+                    isLoading: state.isLoading,
+                    onPressed: () async {
+                      final ok = await state.signInWithGoogle(role);
+                      if (!context.mounted || !ok) return;
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (_) => const MainShell()),
+                        (_) => false,
+                      );
+                    },
+                  ),
                   const SizedBox(height: 20),
                   TextButton(
                     onPressed: () => Navigator.push(
@@ -381,6 +398,31 @@ class _FieldLabel extends StatelessWidget {
         text,
         style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
       ),
+    );
+  }
+}
+
+class _AuthDivider extends StatelessWidget {
+  const _AuthDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      children: [
+        Expanded(child: Divider()),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12),
+          child: Text(
+            'OR',
+            style: TextStyle(
+              color: AppColors.muted,
+              fontWeight: FontWeight.w900,
+              fontSize: 12,
+            ),
+          ),
+        ),
+        Expanded(child: Divider()),
+      ],
     );
   }
 }

@@ -1,17 +1,17 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'app.dart';
+import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (!kIsWeb) {
-    try {
-      await Firebase.initializeApp();
-    } catch (_) {
-      // Desktop/web builds can still run the prototype without Firebase options.
-    }
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (_) {
+    // Unsupported desktop targets and tests can still run the prototype UI.
   }
   runApp(const SupplyWalaApp());
 }

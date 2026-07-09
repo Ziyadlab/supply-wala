@@ -84,6 +84,63 @@ class AppRoundButton extends StatelessWidget {
   }
 }
 
+class GoogleAuthButton extends StatelessWidget {
+  const GoogleAuthButton({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    this.isLoading = false,
+  });
+
+  final String label;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: AppColors.ink,
+        backgroundColor: AppColors.surface,
+        side: const BorderSide(color: AppColors.line),
+        minimumSize: const Size.fromHeight(56),
+      ),
+      onPressed: isLoading ? null : onPressed,
+      child: isLoading
+          ? const SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  height: 24,
+                  width: 24,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: AppColors.line),
+                  ),
+                  child: const Text(
+                    'G',
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(label),
+              ],
+            ),
+    );
+  }
+}
+
 class AppCard extends StatelessWidget {
   const AppCard({
     super.key,
