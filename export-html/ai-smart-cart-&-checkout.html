@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AISmartCartCheckout</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js"></script>
+    <style type="text/tailwindcss">
+      @theme inline {
+        --color-background: var(--background);
+        --color-foreground: var(--foreground);
+        --color-primary: var(--primary);
+        --color-primary-foreground: var(--primary-foreground);
+        --color-secondary: var(--secondary);
+        --color-secondary-foreground: var(--secondary-foreground);
+        --color-muted: var(--muted);
+        --color-muted-foreground: var(--muted-foreground);
+        --color-accent: var(--accent);
+        --color-accent-foreground: var(--accent-foreground);
+        --color-destructive: var(--destructive);
+        --color-card: var(--card);
+        --color-card-foreground: var(--card-foreground);
+        --color-popover: var(--popover);
+        --color-popover-foreground: var(--popover-foreground);
+        --color-border: var(--border);
+        --color-input: var(--input);
+        --color-ring: var(--ring);
+        --color-chart-1: var(--chart-1);
+        --color-chart-2: var(--chart-2);
+        --color-chart-3: var(--chart-3);
+        --color-chart-4: var(--chart-4);
+        --color-chart-5: var(--chart-5);
+
+        --font-font-sans: var(--font-sans);
+        --font-font-heading: var(--font-heading);
+        --font-font-serif: var(--font-serif);
+        --font-font-mono: var(--font-mono);
+      }
+
+      @theme {
+        --radius-xs: calc(var(--radius) - 8px);
+        --radius-sm: calc(var(--radius) - 4px);
+        --radius-md: calc(var(--radius) - 2px);
+        --radius-lg: var(--radius);
+        --radius-xl: calc(var(--radius) + 4px);
+        --radius-2xl: calc(var(--radius) + 8px);
+        --radius-3xl: calc(var(--radius) + 16px);
+        --radius-4xl: calc(var(--radius) + 24px);
+      }
+
+      * {
+        corner-shape: var(--shape, round);
+      }
+
+      .rounded-full, .rounded-none,
+      .rounded-t-full, .rounded-t-none,
+      .rounded-r-full, .rounded-r-none,
+      .rounded-b-full, .rounded-b-none,
+      .rounded-l-full, .rounded-l-none,
+      .rounded-s-full, .rounded-s-none,
+      .rounded-e-full, .rounded-e-none,
+      .rounded-tl-full, .rounded-tl-none,
+      .rounded-tr-full, .rounded-tr-none,
+      .rounded-bl-full, .rounded-bl-none,
+      .rounded-br-full, .rounded-br-none,
+      .rounded-ss-full, .rounded-ss-none,
+      .rounded-se-full, .rounded-se-none,
+      .rounded-es-full, .rounded-es-none,
+      .rounded-ee-full, .rounded-ee-none {
+        corner-shape: round;
+      }
+
+      @utility rounded-* {
+        border-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-t-* {
+        border-top-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-top-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-r-* {
+        border-top-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-bottom-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-b-* {
+        border-bottom-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-bottom-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-l-* {
+        border-top-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-bottom-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-tl-* {
+        border-top-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-tr-* {
+        border-top-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-bl-* {
+        border-bottom-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-br-* {
+        border-bottom-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-s-* {
+        border-start-start-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-end-start-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-e-* {
+        border-start-end-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-end-end-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-ss-* {
+        border-start-start-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-se-* {
+        border-start-end-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-es-* {
+        border-end-start-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-ee-* {
+        border-end-end-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+
+      :root {
+        --shape: squircle;
+        --shape-multiplier: 1;
+
+          --background: #F7F5F0;
+        --foreground: #2B2B2B;
+        --primary: #1E7A46;
+        --primary-foreground: #FFFFFF;
+        --secondary: #E8E5DF;
+        --secondary-foreground: #2B2B2B;
+        --muted: #EAE8E2;
+        --muted-foreground: #6B6B6B;
+        --accent: #F0ECE4;
+        --accent-foreground: #1E7A46;
+        --destructive: #E11D48;
+        --card: #FFFFFF;
+        --card-foreground: #2B2B2B;
+        --popover: #FFFFFF;
+        --popover-foreground: #2B2B2B;
+        --border: #E5E2DC;
+        --input: #FFFFFF;
+        --ring: #1E7A46;
+        --chart-1: #1E7A46;
+        --chart-2: #D97706;
+        --chart-3: #059669;
+        --chart-4: #DC2626;
+        --chart-5: #6B7280;
+
+        --font-sans: "Inter";
+        --font-heading: "Inter";
+        --font-serif: "Playfair Display";
+        --font-mono: "JetBrains Mono";
+
+        --radius: 1rem;
+      }
+
+      @supports (corner-shape: squircle) {
+        :root {
+          --shape-multiplier: 2.5;
+        }
+      }
+
+      /* Prevent layout shift for icons without explicit dimensions */
+      iconify-icon:not([width]):not([height]) {
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+      }
+
+      /* Hide scrollbars */
+      *,
+      *::before,
+      *::after {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      *::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="min-h-screen bg-background pb-32 font-sans flex flex-col">
+      <div
+        class="px-5 py-4 flex items-center justify-between sticky top-0 bg-background/80 backdrop-blur-md z-20"
+      >
+        <div class="flex items-center gap-3">
+          <img
+            src="https://lh3.googleusercontent.com/a/ACg8ocK6avBpc0GIosf5jVvbUiH-jLB805yOBWJU6J5i_-HM7XHjJOk=s96-c"
+            class="size-10 rounded-full border border-border shadow-sm"
+            alt="User"
+          />
+          <div>
+            <h2 class="text-xs text-muted-foreground font-medium">Ordering for</h2>
+            <h1 class="text-sm font-bold text-foreground">Royal Cafe Karachi</h1>
+          </div>
+        </div>
+        <button
+          class="size-10 rounded-full bg-card border border-border flex items-center justify-center shadow-sm"
+        >
+          <iconify-icon icon="ph:bell-duotone" class="text-xl text-foreground"></iconify-icon>
+        </button>
+      </div>
+      <div class="px-5 py-2 flex flex-col gap-6">
+        <div
+          class="bg-gradient-to-br from-primary/10 via-primary/5 to-accent p-5 rounded-[2rem] border border-primary/20 shadow-sm relative overflow-hidden"
+        >
+          <div class="absolute -top-6 -right-6 w-24 h-24 bg-primary/10 rounded-full blur-2xl"></div>
+          <div class="flex items-start justify-between mb-4">
+            <div class="flex items-center gap-2.5">
+              <div
+                class="size-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center shadow-md"
+              >
+                <iconify-icon icon="ph:sparkle-fill" class="text-xl"></iconify-icon>
+              </div>
+              <div>
+                <h3 class="font-bold text-foreground">AI Smart Cart</h3>
+                <p class="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
+                  Weekly Suggestions
+                </p>
+              </div>
+            </div>
+            <button
+              class="text-primary text-[10px] font-bold bg-white/60 hover:bg-white px-3 py-1.5 rounded-full border border-primary/20 transition-all flex items-center gap-1"
+            >
+              <iconify-icon icon="ph:arrows-clockwise-bold"></iconify-icon>REGENERATE
+            </button>
+          </div>
+          <p class="text-sm text-foreground/80 leading-snug mb-0">
+            Based on your last 4 weeks of orders and current market prices, we've optimized your
+            cart for maximum savings.
+          </p>
+        </div>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between mb-2">
+            <h4
+              class="text-sm font-bold text-foreground uppercase tracking-widest flex items-center gap-2"
+            >
+              Your Items
+              <span
+                class="size-5 bg-primary/10 text-primary text-[10px] flex items-center justify-center rounded-full"
+                >3</span
+              >
+            </h4>
+            <button class="text-xs font-semibold text-primary">Clear All</button>
+          </div>
+          <div
+            class="bg-card p-3 rounded-2xl border border-border shadow-sm flex gap-3 relative group"
+          >
+            <img
+              src="https://ggrhecslgdflloszjkwl.supabase.co/storage/v1/object/public/user-assets/aEjWcRwBSZK/components/PsqDfXtDSJ8.jpeg"
+              class="size-20 rounded-xl object-cover bg-muted"
+              alt="Chicken"
+            />
+            <div class="flex-1 flex flex-col justify-between">
+              <div>
+                <div class="flex items-start justify-between">
+                  <h5 class="font-bold text-foreground text-sm leading-tight">
+                    Fresh Chicken Breast
+                  </h5>
+                  <button class="text-muted-foreground hover:text-destructive transition-colors">
+                    <iconify-icon icon="ph:x-circle-bold" class="text-lg"></iconify-icon>
+                  </button>
+                </div>
+                <div class="flex items-center gap-1.5 mt-1">
+                  <span
+                    class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-accent text-primary"
+                    >Khyber Poultry</span
+                  ><span class="text-[10px] text-muted-foreground">• Freshly butchered</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between mt-2">
+                <div class="flex flex-col">
+                  <span class="text-xs font-bold text-foreground"
+                    >PKR 850<span class="text-[10px] font-normal text-muted-foreground"
+                      >/kg</span
+                    ></span
+                  ><span class="text-[10px] text-primary font-bold">Total: PKR 12,750</span>
+                </div>
+                <div class="flex items-center bg-muted rounded-full p-1 border border-border">
+                  <button
+                    class="size-7 flex items-center justify-center rounded-full bg-card border border-border shadow-sm text-foreground hover:bg-accent transition-colors"
+                  >
+                    <iconify-icon icon="ph:minus-bold"></iconify-icon></button
+                  ><span class="px-3 text-sm font-bold text-foreground">15</span
+                  ><button
+                    class="size-7 flex items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm hover:opacity-90 transition-colors"
+                  >
+                    <iconify-icon icon="ph:plus-bold"></iconify-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-card p-3 rounded-2xl border border-border shadow-sm flex gap-3 relative group"
+          >
+            <img
+              src="https://ggrhecslgdflloszjkwl.supabase.co/storage/v1/object/public/user-assets/aEjWcRwBSZK/components/cPgTjKSEjLN.jpeg"
+              class="size-20 rounded-xl object-cover bg-muted"
+              alt="Rice"
+            />
+            <div class="flex-1 flex flex-col justify-between">
+              <div>
+                <div class="flex items-start justify-between">
+                  <h5 class="font-bold text-foreground text-sm leading-tight">
+                    Basmati Rice (Extra Long)
+                  </h5>
+                  <button class="text-muted-foreground hover:text-destructive transition-colors">
+                    <iconify-icon icon="ph:x-circle-bold" class="text-lg"></iconify-icon>
+                  </button>
+                </div>
+                <div class="flex items-center gap-1.5 mt-1">
+                  <span
+                    class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-accent text-primary"
+                    >Punjab Grains Co.</span
+                  ><span class="text-[10px] text-muted-foreground">• 50kg bag</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between mt-2">
+                <div class="flex flex-col">
+                  <span class="text-xs font-bold text-foreground"
+                    >PKR 14,200<span class="text-[10px] font-normal text-muted-foreground"
+                      >/bag</span
+                    ></span
+                  ><span class="text-[10px] text-primary font-bold">Total: PKR 14,200</span>
+                </div>
+                <div class="flex items-center bg-muted rounded-full p-1 border border-border">
+                  <button
+                    class="size-7 flex items-center justify-center rounded-full bg-card border border-border shadow-sm text-foreground hover:bg-accent transition-colors"
+                  >
+                    <iconify-icon icon="ph:minus-bold"></iconify-icon></button
+                  ><span class="px-3 text-sm font-bold text-foreground">1</span
+                  ><button
+                    class="size-7 flex items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm hover:opacity-90 transition-colors"
+                  >
+                    <iconify-icon icon="ph:plus-bold"></iconify-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button
+            class="w-full py-4 border-2 border-dashed border-border rounded-2xl text-muted-foreground font-bold text-sm flex items-center justify-center gap-2 hover:bg-muted/50 hover:border-primary/30 transition-all"
+          >
+            <iconify-icon icon="ph:plus-circle-bold" class="text-xl"></iconify-icon>ADD ANOTHER ITEM
+          </button>
+        </div>
+        <div class="bg-card p-5 rounded-[2rem] border border-border shadow-md space-y-4">
+          <h4 class="font-bold text-foreground border-b border-border pb-3">Order Summary</h4>
+          <div class="space-y-2.5">
+            <div class="flex justify-between text-sm">
+              <span class="text-muted-foreground">Subtotal</span
+              ><span class="font-semibold text-foreground">PKR 26,950</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-muted-foreground">Sales Tax (GST)</span
+              ><span class="font-semibold text-foreground">PKR 4,581</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-muted-foreground">Delivery Fee</span
+              ><span class="font-semibold text-primary uppercase">Free</span>
+            </div>
+            <div class="pt-2 border-t border-border flex justify-between items-center">
+              <span class="font-bold text-foreground">Grand Total</span
+              ><span class="text-xl font-bold text-primary">PKR 31,531</span>
+            </div>
+          </div>
+          <div class="bg-primary/5 p-3 rounded-xl border border-primary/10 flex items-center gap-3">
+            <iconify-icon icon="ph:trend-down-bold" class="text-primary text-xl"></iconify-icon
+            ><span class="text-[11px] font-bold text-primary leading-tight"
+              >AI Savings: You're paying PKR 1,240 less than last week due to optimized
+              sourcing.</span
+            >
+          </div>
+        </div>
+      </div>
+      <div
+        class="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border p-5 pb-8 z-30 flex items-center gap-4"
+      >
+        <div class="flex-1">
+          <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+            Total Amount
+          </p>
+          <p class="text-lg font-bold text-foreground">PKR 31,531</p>
+        </div>
+        <button
+          class="flex-[2] bg-primary text-primary-foreground py-4 rounded-full font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+        >
+          CONFIRM ORDER<iconify-icon icon="ph:arrow-right-bold"></iconify-icon>
+        </button>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/app_theme.dart';
 import '../../state/app_state.dart';
 import '../../widgets/app_widgets.dart';
 
@@ -19,64 +20,111 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Checkout')),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(20, 10, 20, 132),
         children: [
+          const SmartCartBanner(),
+          const SizedBox(height: 22),
+          const Text(
+            'Delivery Address',
+            style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18),
+          ),
+          const SizedBox(height: 10),
           TextField(
             controller: address,
             maxLines: 3,
             decoration: const InputDecoration(
-              labelText: 'Delivery address',
+              hintText: 'Where should your supplier deliver?',
               prefixIcon: Icon(Icons.location_on_outlined),
             ),
           ),
-          const SizedBox(height: 16),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Order Summary',
-                    style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18),
-                  ),
-                  const SizedBox(height: 10),
-                  ...state.cart.map(
-                    (item) => Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              '${item.quantity} x ${item.product.name}',
+          const SizedBox(height: 22),
+          AppCard(
+            padding: const EdgeInsets.all(22),
+            radius: 32,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Order Summary',
+                  style: TextStyle(fontWeight: FontWeight.w900, fontSize: 22),
+                ),
+                const SizedBox(height: 18),
+                const Divider(height: 1),
+                const SizedBox(height: 12),
+                ...state.cart.map(
+                  (item) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '${item.quantity} x ${item.product.name}',
+                            style: const TextStyle(
+                              color: AppColors.muted,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                          Text('Rs ${item.total.toStringAsFixed(0)}'),
-                        ],
-                      ),
+                        ),
+                        Text(
+                          'PKR ${item.total.toStringAsFixed(0)}',
+                          style: const TextStyle(fontWeight: FontWeight.w900),
+                        ),
+                      ],
                     ),
                   ),
-                  const Divider(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                ),
+                const SizedBox(height: 12),
+                const Divider(height: 1),
+                const SizedBox(height: 18),
+                SummaryRow(
+                  label: 'Grand Total',
+                  value: 'PKR ${state.cartTotal.toStringAsFixed(0)}',
+                  highlight: true,
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: .06),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: .12),
+                    ),
+                  ),
+                  child: const Row(
                     children: [
-                      const Text(
-                        'Payable',
-                        style: TextStyle(fontWeight: FontWeight.w900),
+                      Icon(
+                        Icons.trending_down_rounded,
+                        color: AppColors.primary,
                       ),
-                      Text(
-                        'Rs ${state.cartTotal.toStringAsFixed(0)}',
-                        style: const TextStyle(fontWeight: FontWeight.w900),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'AI Savings: optimized sourcing will be calculated from live pricing.',
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 12,
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 16),
-          ElevatedButton.icon(
+        ],
+      ),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 18),
+          decoration: BoxDecoration(
+            color: AppColors.background.withValues(alpha: .96),
+            border: const Border(top: BorderSide(color: AppColors.line)),
+          ),
+          child: ElevatedButton.icon(
             onPressed: () {
               final order = state.checkout(address.text);
               if (order == null) return;
@@ -85,10 +133,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               );
               Navigator.popUntil(context, (route) => route.isFirst);
             },
-            icon: const Icon(Icons.check_circle_outline),
-            label: const Text('Place Order'),
+            icon: const Icon(Icons.arrow_forward_rounded),
+            label: const Text('PLACE ORDER'),
           ),
-        ],
+        ),
       ),
       floatingActionButton: const VoiceAssistantButton(),
     );
