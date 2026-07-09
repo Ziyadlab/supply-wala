@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "736906554111",
+    "project_id": "supplywala-d2682",
+    "storage_bucket": "supplywala-d2682.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:736906554111:android:7d3b6f2da436833444baca",
+        "android_client_info": {
+          "package_name": "com.example.supplywala1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDJPC5Ha43wm-TcrccCeoIU5MVU3NJJ-Ow"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
